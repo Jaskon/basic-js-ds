@@ -8,6 +8,34 @@ function replaceNode(parent, node, newNode = null) {
   }
 }
 
+function findLowest(parent, node) {
+  while (node.left) {
+    parent = node;
+    node = node.left;
+  }
+  return [parent, node];
+}
+
+function deleteNode(parent, node) {
+  // No children
+  if (!node.left && !node.right) {
+    return replaceNode(parent, node, null);
+  }
+
+  // One children
+  if ((!node.left && node.right) || (!node.right && node.left)) {
+    return replaceNode(parent, node, node.left || node.right);
+  }
+
+  // Both children
+  // TODO: find lowest in the right subtree
+  //  set current node value to found element
+  //  call deletion (above two 'if's) on that element
+  const [foundParent, foundNode] = findLowest(node, node.right);
+  node.data = foundNode.data;
+  deleteNode(foundParent, foundNode);
+}
+
 /**
 * Implement simple binary search tree according to task description
 * using Node from extensions
@@ -72,13 +100,10 @@ module.exports = class BinarySearchTree {
   }
 
   remove(data) {
-    // Algorithm
-    // https://www.techiedelight.com/deletion-from-bst/
-
     let parent = null;
     let node = this.node;
 
-    while (node && node.data === data) {
+    while (node && node.data !== data) {
       if (data < node.data) {
         parent = node;
         node = node.left;
@@ -94,26 +119,18 @@ module.exports = class BinarySearchTree {
       return null;
     }
 
-    if (parent === null) {
-      // TODO: node to delete is the root one
-      return null;
-    }
+    // if (parent === null) {
+    //   // TODO: node to delete is the root one
+    //   return null;
+    // }
 
 
     // Deletion logic
 
-    // No childrens
-    if (!node.left && !node.right) {
-      replaceNode(parent, node, null);
-    }
-
-    // One children
-    if ((!node.left && node.right) || (!node.right && node.left)) {
-      replaceNode(parent, node, node.left || node.right);
-    }
+    // No one one children
+    deleteNode(parent, node);
 
     // Both children
-    // TODO
   }
 
   min() {
